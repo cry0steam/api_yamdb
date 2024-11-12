@@ -1,8 +1,9 @@
 from django.contrib.auth.models import AbstractUser
+from django.core.validators import MaxValueValidator
 from django.db import models
+from django.utils import timezone
 
-
-SYMBOLS_LIMIT = 25
+from .constants import CHAR_FIELD_LIMIT, SLUG_FIELD_LIMIT, SYMBOLS_LIMIT
 
 
 class User(AbstractUser):
@@ -10,8 +11,14 @@ class User(AbstractUser):
 
 
 class Genre(models.Model):
-    name = models.CharField(max_length=256, verbose_name='Название')
-    slug = models.SlugField(max_length=50, unique=True, verbose_name='Слаг')
+    name = models.CharField(
+        max_length=CHAR_FIELD_LIMIT,
+        verbose_name='Название'
+    )
+    slug = models.SlugField(
+        max_length=SLUG_FIELD_LIMIT,
+        unique=True, verbose_name='Слаг'
+    )
 
     class Meta:
         ordering = ['name']
@@ -23,8 +30,14 @@ class Genre(models.Model):
 
 
 class Category(models.Model):
-    name = models.CharField(max_length=256, verbose_name='Название')
-    slug = models.SlugField(max_length=50, unique=True, verbose_name='Слаг')
+    name = models.CharField(
+        max_length=CHAR_FIELD_LIMIT,
+        verbose_name='Название'
+    )
+    slug = models.SlugField(
+        max_length=SLUG_FIELD_LIMIT,
+        unique=True, verbose_name='Слаг'
+    )
 
     class Meta:
         ordering = ['name']
@@ -36,8 +49,14 @@ class Category(models.Model):
 
 
 class Title(models.Model):
-    name = models.CharField(max_length=256, verbose_name='Название')
-    year = models.SmallIntegerField(verbose_name='Год создания')
+    name = models.CharField(
+        max_length=CHAR_FIELD_LIMIT,
+        verbose_name='Название'
+    )
+    year = models.SmallIntegerField(
+        verbose_name='Год создания',
+        validators=[MaxValueValidator(timezone.now().year)]
+    )
     description = models.TextField(
         null=True,
         blank=True,
