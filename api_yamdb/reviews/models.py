@@ -11,6 +11,7 @@ class User(AbstractUser):
 
 
 class Genre(models.Model):
+    '''Модель для имени и описания жанра.'''
     name = models.CharField(
         max_length=CHAR_FIELD_LIMIT,
         verbose_name='Название'
@@ -30,6 +31,7 @@ class Genre(models.Model):
 
 
 class Category(models.Model):
+    '''Модель для имени и описания категории.'''
     name = models.CharField(
         max_length=CHAR_FIELD_LIMIT,
         verbose_name='Название'
@@ -49,6 +51,7 @@ class Category(models.Model):
 
 
 class Title(models.Model):
+    '''Модель, описывающая произведение.'''
     name = models.CharField(
         max_length=CHAR_FIELD_LIMIT,
         verbose_name='Название'
