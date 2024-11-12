@@ -20,8 +20,8 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    "reviews.app.ReviewsConfig",
-    "api.app.ApiConfig",
+    "reviews.apps.ReviewsConfig",
+    "api.apps.ApiConfig",
 ]
 
 MIDDLEWARE = [
@@ -102,3 +102,5 @@ USE_TZ = True
 STATIC_URL = "/static/"
 
 STATICFILES_DIRS = ((BASE_DIR / "static/"),)
+
+AUTH_USER_MODEL = "reviews.User"
