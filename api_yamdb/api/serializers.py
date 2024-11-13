@@ -1,9 +1,33 @@
-"""Модуль содержит настройки сериализаторов приложения API."""
-from rest_framework import serializers   # type: ignore
+from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator  # type: ignore
 
-from reviews.models import Review, Comments
+from reviews.models import Category, Genre, Title, Review, Comments
 
+
+
+class CategorySerializer(serializers.ModelSerializer):
+    '''Сериализатор для категории.'''
+    class Meta:
+        model = Category
+        fields = ('name', 'slug')
+
+
+class GenreSerializer(serializers.ModelSerializer):
+    '''Сериализатор для жанров.'''
+    class Meta:
+        model = Genre
+        fields = ('name', 'slug')
+
+
+class TitleSerializer(serializers.ModelSerializer):
+    '''Сериализатор для произведений.'''
+    category = CategorySerializer()
+    genre = GenreSerializer(many=True)
+    rating = serializers.FloatField(read_only=True)
+
+    class Meta:
+        model = Title
+        fields = '__all__'
 
 class ReviewSerializer(serializers.ModelSerializer):   
     """Настройки сериализатора модели Review."""
