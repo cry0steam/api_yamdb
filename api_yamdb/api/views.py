@@ -8,6 +8,10 @@ from api.serializers import ReviewSerializer, CommentsSerializer
 from api.permissions import IsAuthorOrReadOnly
 
 
+def get_needed_object(obj, model, id):
+    return get_object_or_404(model, id=obj.kwargs.get(id))
+
+
 class ReviewViewSet(viewsets.ModelViewSet):
     """Настройки вьюсета модели Review."""
 
@@ -21,15 +25,13 @@ class ReviewViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         """Определяет необходимый набор queryset для сериализации."""
-        title_id = self.kwargs.get('title_id')
-        title = get_object_or_404(Title, id=title_id)
-        return title.reviews.all()
+        return get_needed_object(self, Title, 'title_id').reviews.all()
 
     def perform_create(self, serializer):
         """Создание нового экземпляра модели после сериализации."""
-        title_id = self.kwargs.get('title_id')
-        title = get_object_or_404(Title, id=title_id)
-        serializer.save(author=self.request.user, title=title)
+        serializer.save(author=self.request.user,
+                        title=get_needed_object(self, Title, 'title_id')
+                        )
 
 
 class CommentsViewSet(viewsets.ModelViewSet):
@@ -45,12 +47,10 @@ class CommentsViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         """Определяет необходимый набор queryset для сериализации."""
-        review_id = self.kwargs.get('review_id')
-        review = get_object_or_404(Review, id=review_id)
-        return review.comments.all()
+        return get_needed_object(self, Review, 'review_id').comments.all()
 
     def perform_create(self, serializer):
         """Создание нового экземпляра модели после сериализации."""
-        review_id = self.kwargs.get('review_id')
-        review = get_object_or_404(Review, id=review_id)
-        serializer.save(author=self.request.user, review=review)
+        serializer.save(author=self.request.user,
+                        review=get_needed_object(self, Review, 'review_id')
+                        )
