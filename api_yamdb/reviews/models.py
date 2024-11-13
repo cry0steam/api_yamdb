@@ -98,6 +98,7 @@ class TitleGenres(models.Model):
         on_delete=models.SET_NULL
     )
 
+
 class Review(models.Model):
     """Настройки модели Отзывов."""
 
@@ -151,4 +152,3 @@ class Comments(models.Model):
     def __str__(self):
         """Возвращает строковое представление объекта."""
         return self.text
-
