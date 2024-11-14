@@ -3,7 +3,15 @@
 from django.urls import include, path  # type: ignore
 from rest_framework.routers import DefaultRouter  # type: ignore
 
-from api.views import APIGetToken, APISignup, CommentsViewSet, ReviewViewSet
+from api.views import (
+    APIGetToken,
+    APISignup,
+    CategoryViewSet,
+    CommentsViewSet,
+    GenreViewSet,
+    ReviewViewSet,
+    TitleViewSet
+)
 
 router_v1 = DefaultRouter()
 router_v1.register(
@@ -14,6 +22,9 @@ router_v1.register(
     CommentsViewSet,
     basename='comment',
 )
+router_v1.register('titles', TitleViewSet, basename='title')
+router_v1.register('categories', CategoryViewSet, basename='category')
+router_v1.register('genres', GenreViewSet, basename='genre')
 
 urlpatterns = [
     path('v1/', include(router_v1.urls)),
