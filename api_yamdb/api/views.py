@@ -2,16 +2,16 @@ from django.db.models import Avg
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.pagination import PageNumberPagination
-from rest_framework import filters, mixins, permissions, viewsets
+from rest_framework import filters, mixins, viewsets
 
 from reviews.models import Category, Genre, Title, Review, Comments, Title
-from .permissions import IsAdminOrReadOnly, IsAuthorOrReadOnly
+from .permissions import IsAdmin, IsAdminOrReadOnly
 from .serializers import (
     CategorySerializer,
     GenreSerializer,
     TitleSerializer,
-    ReviewSerializer,
-    CommentsSerializer
+   ReviewSerializer,
+   CommentsSerializer
 )
 
 
@@ -55,7 +55,6 @@ class TitleViewSet(viewsets.ModelViewSet):
             slug__in=self.request.data.getlist('genre')
         )
         serializer.save(category=category, genre=genre)
-
 
 def get_needed_object(obj, model, id):
     return get_object_or_404(model, id=obj.kwargs.get(id))
