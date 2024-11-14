@@ -3,14 +3,16 @@ from django.db.models import Avg
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, mixins, status, viewsets
+from rest_framework.decorators import action
+from rest_framework.filters import SearchFilter
 from rest_framework.pagination import PageNumberPagination
-from rest_framework.permissions import AllowAny, IsAuthenticatedOrReadOnly
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 from reviews.models import Category, Comments, Genre, Review, Title, User
 
-from .permissions import IsAdminOrReadOnly, IsAuthorOrReadOnly
+from .permissions import IsAdmin, IsAdminOrReadOnly, IsAuthorOrReadOnly
 from .serializers import (
     CategorySerializer,
     CommentsSerializer,
@@ -19,6 +21,8 @@ from .serializers import (
     SignUpSerializer,
     TitleSerializer,
     TokenSerializer,
+    UserAdminSerializer,
+    UserNotAdminSerializer,
 )
 
 
@@ -78,10 +82,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
     queryset = Review.objects.all()
     serializer_class = ReviewSerializer
     pagination_class = PageNumberPagination
-    permission_classes = (
-        IsAuthenticatedOrReadOnly,
-        IsAuthorOrReadOnly,
-    )
+    permission_classes = (IsAuthorOrReadOnly,)
     ordering_fields = ('-pub_date',)
 
     def get_queryset(self):
@@ -102,10 +103,7 @@ class CommentsViewSet(viewsets.ModelViewSet):
     queryset = Comments.objects.all()
     serializer_class = CommentsSerializer
     pagination_class = PageNumberPagination
-    permission_classes = (
-        IsAuthenticatedOrReadOnly,
-        IsAuthorOrReadOnly,
-    )
+    permission_classes = (IsAuthorOrReadOnly,)
     ordering_fields = ('-pub_date',)
 
     def get_queryset(self):
@@ -170,3 +168,39 @@ class APIGetToken(APIView):
             {'confirmation_code': 'Неверный код подтверждения!'},
             status=status.HTTP_400_BAD_REQUEST,
         )
+
+
+class UserViewSet(viewsets.ModelViewSet):
+    queryset = User.objects.all()
+    serializer_class = UserAdminSerializer
+    permission_classes = (IsAuthenticated, IsAdmin)
+    lookup_field = 'username'
+    filter_backends = (SearchFilter,)
+    search_fields = ('username',)
+
+    def get_serializer_class(self):
+        if (
+            self.action == 'get_current_user_info'
+            and not self.request.user.is_admin
+        ):
+            return UserNotAdminSerializer
+        return UserAdminSerializer
+
+    @action(
+        methods=['GET', 'PATCH'],
+        detail=False,
+        permission_classes=(IsAuthenticated,),
+        url_path='me',
+    )
+    def get_current_user_info(self, request):
+        serializer_class = self.get_serializer_class()
+        serializer = serializer_class(
+            request.user,
+            data=request.data if request.method == 'PATCH' else None,
+            partial=True,
+        )
+        if request.method == 'PATCH':
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.data)

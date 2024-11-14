@@ -72,3 +72,25 @@ class TokenSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ('username', 'confirmation_code')
+
+
+class BaseUserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = (
+            'username',
+            'email',
+            'first_name',
+            'last_name',
+            'bio',
+            'role',
+        )
+
+
+class UserAdminSerializer(BaseUserSerializer):
+    pass
+
+
+class UserNotAdminSerializer(BaseUserSerializer):
+    class Meta(BaseUserSerializer.Meta):
+        read_only_fields = ('role',)
