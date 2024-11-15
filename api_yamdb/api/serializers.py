@@ -21,8 +21,8 @@ class GenreSerializer(serializers.ModelSerializer):
 class TitleSerializer(serializers.ModelSerializer):
     """Сериализатор для произведений."""
 
-    category = CategorySerializer()
-    genre = GenreSerializer(many=True)
+    category = CategorySerializer(read_only=True)
+    genre = GenreSerializer(read_only=True, many=True)
     rating = serializers.FloatField(read_only=True)
 
     class Meta:
@@ -36,11 +36,12 @@ class ReviewSerializer(serializers.ModelSerializer):
     author = serializers.SlugRelatedField(
         slug_field='username', read_only=True
     )
+    score = serializers.IntegerField(min_value=1, max_value=10)
 
     class Meta:
         """Метаданные сериализатора отзывов."""
 
-        fields = '__all__'
+        fields = ('id', 'author', 'text', 'pub_date', 'score')
         model = Review
 
 
