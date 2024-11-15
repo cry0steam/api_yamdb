@@ -39,6 +39,7 @@ class ListCreateDestroyViewSet(
     ]
     filter_backends = (filters.SearchFilter,)
     search_fields = ('name',)
+    lookup_field = 'slug'
 
 class CategoryViewSet(ListCreateDestroyViewSet):
     queryset = Category.objects.all()
@@ -51,6 +52,7 @@ class GenreViewSet(ListCreateDestroyViewSet):
 
 
 class TitleViewSet(viewsets.ModelViewSet):
+    http_method_names = ['post', 'get', 'delete', 'patch']
     queryset = Title.objects.annotate(rating=Avg('reviews__score')).order_by(
         'name'
     )
@@ -69,6 +71,9 @@ class TitleViewSet(viewsets.ModelViewSet):
             slug__in=self.request.data.getlist('genre')
         )
         serializer.save(category=category, genre=genre)
+
+    def perform_update(self, serializer):
+        self.perform_create(serializer)
 
 
 def get_needed_object(obj, model, id):
