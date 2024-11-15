@@ -1,6 +1,10 @@
 from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.tokens import default_token_generator
-from django.core.validators import MaxValueValidator, MinValueValidator
+from django.core.validators import (
+    MaxValueValidator,
+    MinValueValidator,
+    RegexValidator,
+)
 from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
@@ -8,12 +12,52 @@ from django.utils import timezone
 
 from .constants import CHAR_FIELD_LIMIT, SLUG_FIELD_LIMIT, SYMBOLS_LIMIT
 
+USER = 'user'
+ADMIN = 'admin'
+MODERATOR = 'moderator'
+
+ROLE_CHOICES = [
+    (USER, USER),
+    (ADMIN, ADMIN),
+    (MODERATOR, MODERATOR),
+]
+
 
 class User(AbstractUser):
-    role = models.CharField('роль', max_length=20, blank=True)
+    role = models.CharField(
+        'роль', choices=ROLE_CHOICES, default=USER, max_length=20, blank=True
+    )
     confirmation_code = models.CharField(
         'код подтверждения', max_length=255, blank=False, default='012345'
     )
+    bio = models.TextField(
+        'биография',
+        blank=True,
+    )
+    username = models.CharField(
+        max_length=150,
+        verbose_name='Имя пользователя',
+        unique=True,
+        db_index=True,
+        validators=[
+            RegexValidator(
+                regex=r'^[\w.@+-]+$',
+                message='Имя пользователя содержит недопустимый символ',
+            )
+        ],
+    )
+
+    @property
+    def is_user(self):
+        return self.role == USER
+
+    @property
+    def is_admin(self):
+        return self.role == ADMIN
+
+    @property
+    def is_moderator(self):
+        return self.role == MODERATOR
 
 
 @receiver(post_save, sender=User)
