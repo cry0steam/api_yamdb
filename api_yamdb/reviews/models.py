@@ -1,3 +1,4 @@
+"""Модуль содержит конфигурации моделей приложения Review."""
 from django.contrib.auth.models import AbstractUser
 from django.core.validators import (
     MaxValueValidator,

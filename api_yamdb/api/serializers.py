@@ -1,3 +1,4 @@
+"""Модуль содержит настройки сериализаторов приложения API."""
 from rest_framework import serializers
 from reviews.models import Category, Comments, Genre, Review, Title, User
 from reviews.validators import validate_username
