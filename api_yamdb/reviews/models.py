@@ -1,16 +1,13 @@
 from django.contrib.auth.models import AbstractUser
-from django.contrib.auth.tokens import default_token_generator
 from django.core.validators import (
     MaxValueValidator,
     MinValueValidator,
-    RegexValidator,
 )
 from django.db import models
-from django.db.models.signals import post_save
-from django.dispatch import receiver
 from django.utils import timezone
 
 from .constants import CHAR_FIELD_LIMIT, SLUG_FIELD_LIMIT, SYMBOLS_LIMIT
+from .validators import validate_username
 
 USER = 'user'
 ADMIN = 'admin'
@@ -34,17 +31,12 @@ class User(AbstractUser):
         'биография',
         blank=True,
     )
+    email = models.EmailField('почта', unique=True)
     username = models.CharField(
         max_length=150,
-        verbose_name='Имя пользователя',
+        verbose_name='имя пользователя',
         unique=True,
-        db_index=True,
-        validators=[
-            RegexValidator(
-                regex=r'^[\w.@+-]+$',
-                message='Имя пользователя содержит недопустимый символ',
-            )
-        ],
+        validators=(validate_username,),
     )
 
     @property
@@ -59,13 +51,24 @@ class User(AbstractUser):
     def is_moderator(self):
         return self.role == MODERATOR
 
+    # @receiver(post_save, sender=User)
+    # def post_save(sender, instance, created, **kwargs):
+    #     if created:
+    #         confirmation_code = default_token_generator.make_token(instance)
+    #         instance.confirmation_code = confirmation_code
+    #         instance.save()
+    class Meta:
+        verbose_name = 'Пользователь'
+        verbose_name_plural = 'Пользователи'
+        ordering = ['username']
+        constraints = [
+            models.UniqueConstraint(
+                fields=('username', 'email'), name='usrname_email_constraint'
+            ),
+        ]
 
-@receiver(post_save, sender=User)
-def post_save(sender, instance, created, **kwargs):
-    if created:
-        confirmation_code = default_token_generator.make_token(instance)
-        instance.confirmation_code = confirmation_code
-        instance.save()
+    def __str__(self):
+        return self.username
 
 
 class Genre(models.Model):

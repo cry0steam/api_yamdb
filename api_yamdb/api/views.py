@@ -1,3 +1,4 @@
+from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import EmailMessage
 from django.db.models import Avg
 from django.shortcuts import get_object_or_404
@@ -22,8 +23,7 @@ from .serializers import (
     SignUpSerializer,
     TitleSerializer,
     TokenSerializer,
-    UserAdminSerializer,
-    UserNotAdminSerializer,
+    UserSerializer,
 )
 
 
@@ -152,10 +152,12 @@ class APISignup(APIView):
     def post(self, request):
         serializer = SignUpSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        user = serializer.save()
+        # user = serializer.save()
+        user, _ = User.objects.get_or_create(**serializer.validated_data)
+        confirmation_code = default_token_generator.make_token(user)
         email_body = (
             f'Привет, {user.username}.'
-            f'\nКод подтверждения: {user.confirmation_code}'
+            f'\nКод подтверждения: {confirmation_code}'
         )
         data = {
             'email_body': email_body,
@@ -191,19 +193,12 @@ class APIGetToken(APIView):
 
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
-    serializer_class = UserAdminSerializer
     permission_classes = (IsAuthenticated, IsAdmin)
     lookup_field = 'username'
     filter_backends = (SearchFilter,)
     search_fields = ('username',)
-
-    def get_serializer_class(self):
-        if (
-            self.action == 'get_current_user_info'
-            and not self.request.user.is_admin
-        ):
-            return UserNotAdminSerializer
-        return UserAdminSerializer
+    http_method_names = ('get', 'post', 'patch', 'delete', 'head', 'options')
+    serializer_class = UserSerializer
 
     @action(
         methods=['GET', 'PATCH'],
@@ -212,14 +207,13 @@ class UserViewSet(viewsets.ModelViewSet):
         url_path='me',
     )
     def get_current_user_info(self, request):
-        serializer_class = self.get_serializer_class()
-        serializer = serializer_class(
-            request.user,
-            data=request.data if request.method == 'PATCH' else None,
-            partial=True,
-        )
-        if request.method == 'PATCH':
-            serializer.is_valid(raise_exception=True)
-            serializer.save()
+        if request.method == 'GET':
+            user = get_object_or_404(User, username=request.user.username)
+            serializer = UserSerializer(user)
             return Response(serializer.data, status=status.HTTP_200_OK)
-        return Response(serializer.data)
+        serializer = UserSerializer(
+            request.user, data=request.data, partial=True
+        )
+        serializer.is_valid(raise_exception=True)
+        serializer.save(role=request.user.role)
+        return Response(serializer.data, status=status.HTTP_200_OK)
