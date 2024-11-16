@@ -1,3 +1,4 @@
+"""Модуль содержит настройки правил запретов API."""
 from rest_framework.permissions import SAFE_METHODS, BasePermission
 
 
@@ -29,10 +30,12 @@ class IsAuthorOrReadOnly(BasePermission):
     """
 
     def has_permission(self, request, view):
+        """Метод проверяет аутефецикацию и безопасный метод."""
         return request.method in SAFE_METHODS or request.user.is_authenticated
 
     def has_object_permission(self, request, view, obj):
         """Метод проверяет является ли user автором, модератором или админом.
+
         Безопасный ли метод запроса
         """
         return (

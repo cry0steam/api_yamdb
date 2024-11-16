@@ -1,3 +1,4 @@
+"""Модуль содержит настройки view-функций приложения API."""
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import EmailMessage
 from django.db.models import Avg
@@ -90,6 +91,7 @@ class TitleViewSet(viewsets.ModelViewSet):
 
 
 def get_needed_object(obj, model, id):
+    """Метод получени объекта на основе модели и id."""
     return get_object_or_404(model, id=obj.kwargs.get(id))
 
 
