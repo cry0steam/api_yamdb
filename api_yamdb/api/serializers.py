@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from reviews.models import Category, Comments, Genre, Review, Title, User
+from reviews.validators import validate_username
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -20,6 +21,7 @@ class GenreSerializer(serializers.ModelSerializer):
 
 class TitleSerializer(serializers.ModelSerializer):
     """Класс сериализатора для произведений."""
+
     category = CategorySerializer(read_only=True)
     genre = GenreSerializer(read_only=True, many=True)
     rating = serializers.FloatField(read_only=True)
@@ -59,9 +61,35 @@ class CommentsSerializer(serializers.ModelSerializer):
 
 
 class SignUpSerializer(serializers.ModelSerializer):
+    username = serializers.CharField(
+        validators=[validate_username], required=True
+    )
+    email = serializers.EmailField(required=True, max_length=254)
+
     class Meta:
         model = User
-        fields = ('email', 'username')
+        fields = ('username', 'email')
+
+    def validate(self, data):
+        username = data.get('username')
+        email = data.get('email')
+        if User.objects.filter(email=email, username=username).exists():
+            return data
+        if User.objects.filter(email=email).exists():
+            raise serializers.ValidationError(
+                {'email': 'Email already registered'}
+            )
+        if User.objects.filter(username=username).exists():
+            raise serializers.ValidationError(
+                {'username': 'Username already taken'}
+            )
+        return data
+
+    def create(self, validated_data):
+        email = validated_data.get('email')
+        username = validated_data.get('username')
+        user, _ = User.objects.get_or_create(email=email, username=username)
+        return user
 
 
 class TokenSerializer(serializers.ModelSerializer):
@@ -73,7 +101,7 @@ class TokenSerializer(serializers.ModelSerializer):
         fields = ('username', 'confirmation_code')
 
 
-class BaseUserSerializer(serializers.ModelSerializer):
+class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = (
@@ -84,12 +112,3 @@ class BaseUserSerializer(serializers.ModelSerializer):
             'bio',
             'role',
         )
-
-
-class UserAdminSerializer(BaseUserSerializer):
-    pass
-
-
-class UserNotAdminSerializer(BaseUserSerializer):
-    class Meta(BaseUserSerializer.Meta):
-        read_only_fields = ('role',)
