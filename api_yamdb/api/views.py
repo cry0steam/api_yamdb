@@ -42,7 +42,6 @@ class ListCreateDestroyViewSet(
     search_fields = ('name',)
     lookup_field = 'slug'
 
-
 class CategoryViewSet(ListCreateDestroyViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
@@ -102,6 +101,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
     pagination_class = PageNumberPagination
     permission_classes = (IsAuthorOrReadOnly,)
     ordering_fields = ('-pub_date',)
+    http_method_names = ['post', 'get', 'delete', 'patch']
 
     def get_queryset(self):
         """Определяет необходимый набор queryset для сериализации."""
@@ -123,6 +123,7 @@ class CommentsViewSet(viewsets.ModelViewSet):
     pagination_class = PageNumberPagination
     permission_classes = (IsAuthorOrReadOnly,)
     ordering_fields = ('-pub_date',)
+    http_method_names = ['post', 'get', 'delete', 'patch']
 
     def get_queryset(self):
         """Определяет необходимый набор queryset для сериализации."""

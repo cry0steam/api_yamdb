@@ -37,12 +37,28 @@ class ReviewSerializer(serializers.ModelSerializer):
     author = serializers.SlugRelatedField(
         slug_field='username', read_only=True
     )
+    score = serializers.IntegerField(min_value=1, max_value=10)
+    title = serializers.PrimaryKeyRelatedField(read_only=True)
 
     class Meta:
         """Метаданные сериализатора отзывов."""
 
         fields = '__all__'
         model = Review
+
+    def validate(self, data):
+        """Метод валидации данных добавления отзыва."""
+        author = self.context['request'].user
+        title_id = self.context['view'].kwargs['title_id']
+
+        if self.context['request'].method == 'POST':
+            if Review.objects.filter(author=author,
+                                     title_id=title_id).exists():
+                raise serializers.ValidationError(
+                    'Вы уже оставили отзыв на это произведение.'
+                )
+
+        return data
 
 
 class CommentsSerializer(serializers.ModelSerializer):

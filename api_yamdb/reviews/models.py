@@ -176,6 +176,12 @@ class Review(models.Model):
         ordering = ('pub_date',)
         verbose_name = 'отзыв'
         verbose_name_plural = 'Отзывы'
+        constraints = [
+            models.UniqueConstraint(
+                fields=['author', 'title'],
+                name='unique_author_title'
+            )
+        ]
 
     def __str__(self):
         """Возвращает строковое представление объекта."""
