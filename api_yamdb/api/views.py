@@ -121,7 +121,6 @@ class CommentsViewSet(viewsets.ModelViewSet):
         serializer.save(
             author=self.request.user,
             review=get_needed_object(self, Review, 'review_id'),
-            #score=self.request.data.getlist('score')
         )
 
 
