@@ -1,6 +1,7 @@
 from django.core.mail import EmailMessage
 from django.db.models import Avg
 from django.shortcuts import get_object_or_404
+from django_filters import CharFilter, FilterSet
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, mixins, status, viewsets
 from rest_framework.decorators import action
@@ -51,6 +52,18 @@ class GenreViewSet(ListCreateDestroyViewSet):
     serializer_class = GenreSerializer
 
 
+class TitleFilterSet(FilterSet):
+    category = CharFilter(field_name='category__slug')
+    genre = CharFilter(field_name='genre__slug')
+    name = CharFilter(lookup_expr='iexact')
+
+    class Meta:
+        model = Title
+        fields = {
+            'year': ['exact'],
+        }
+
+
 class TitleViewSet(viewsets.ModelViewSet):
     http_method_names = ['post', 'get', 'delete', 'patch']
     queryset = Title.objects.annotate(rating=Avg('reviews__score')).order_by(
@@ -61,7 +74,7 @@ class TitleViewSet(viewsets.ModelViewSet):
         IsAdminOrReadOnly,
     ]
     filter_backends = (DjangoFilterBackend,)
-    filterset_fields = ('category', 'genre', 'name', 'year')
+    filterset_class = TitleFilterSet
 
     def perform_create(self, serializer):
         category = get_object_or_404(
