@@ -1,4 +1,5 @@
 """Модуль содержит настройки view-функций приложения API."""
+
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import EmailMessage
 from django.db.models import Avg
@@ -42,6 +43,7 @@ class ListCreateDestroyViewSet(
     filter_backends = (filters.SearchFilter,)
     search_fields = ('name',)
     lookup_field = 'slug'
+
 
 class CategoryViewSet(ListCreateDestroyViewSet):
     queryset = Category.objects.all()
@@ -154,7 +156,6 @@ class APISignup(APIView):
     def post(self, request):
         serializer = SignUpSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        # user = serializer.save()
         user, _ = User.objects.get_or_create(**serializer.validated_data)
         confirmation_code = default_token_generator.make_token(user)
         email_body = (
@@ -182,11 +183,11 @@ class APIGetToken(APIView):
                 {'username': 'Пользователь не найден'},
                 status=status.HTTP_404_NOT_FOUND,
             )
-        if data.get('confirmation_code') == user.confirmation_code:
+        if default_token_generator.check_token(
+            user, data['confirmation_code']
+        ):
             token = RefreshToken.for_user(user).access_token
-            return Response(
-                {'token': str(token)}, status=status.HTTP_201_CREATED
-            )
+            return Response({'token': str(token)}, status=status.HTTP_200_OK)
         return Response(
             {'confirmation_code': 'Неверный код подтверждения!'},
             status=status.HTTP_400_BAD_REQUEST,
