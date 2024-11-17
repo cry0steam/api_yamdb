@@ -43,6 +43,7 @@ class ListCreateDestroyViewSet(
     search_fields = ('name',)
     lookup_field = 'slug'
 
+
 class CategoryViewSet(ListCreateDestroyViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
