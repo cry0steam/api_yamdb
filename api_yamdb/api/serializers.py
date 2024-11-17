@@ -1,4 +1,5 @@
 """Модуль содержит настройки сериализаторов приложения API."""
+
 from rest_framework import serializers
 from reviews.models import Category, Comments, Genre, Review, Title, User
 from reviews.validators import validate_username
@@ -53,8 +54,9 @@ class ReviewSerializer(serializers.ModelSerializer):
         title_id = self.context['view'].kwargs['title_id']
 
         if self.context['request'].method == 'POST':
-            if Review.objects.filter(author=author,
-                                     title_id=title_id).exists():
+            if Review.objects.filter(
+                author=author, title_id=title_id
+            ).exists():
                 raise serializers.ValidationError(
                     'Вы уже оставили отзыв на это произведение.'
                 )
@@ -79,7 +81,7 @@ class CommentsSerializer(serializers.ModelSerializer):
 
 class SignUpSerializer(serializers.ModelSerializer):
     username = serializers.CharField(
-        validators=[validate_username], required=True
+        validators=[validate_username], required=True, max_length=150
     )
     email = serializers.EmailField(required=True, max_length=254)
 
@@ -92,13 +94,13 @@ class SignUpSerializer(serializers.ModelSerializer):
         email = data.get('email')
         if User.objects.filter(email=email, username=username).exists():
             return data
-        if User.objects.filter(email=email).exists():
-            raise serializers.ValidationError(
-                {'email': 'Email already registered'}
-            )
         if User.objects.filter(username=username).exists():
             raise serializers.ValidationError(
                 {'username': 'Username already taken'}
+            )
+        if User.objects.filter(email=email).exists():
+            raise serializers.ValidationError(
+                {'email': 'Email already registered'}
             )
         return data
 

@@ -9,8 +9,8 @@ def validate_username(value):
             ('Имя пользователя не может быть <me>.'),
             params={'value': value},
         )
-    if re.search(r'^[a-zA-Z][a-zA-Z0-9-_\.]{1,20}$', value) is None:
+    if re.search(r'^[\w.@+-]+\Z', value) is None:
         raise ValidationError(
-            (f'Недопустимые символы <{value}> в нике.'),
+            (f'Недопустимые символы <{value}> в username.'),
             params={'value': value},
         )

@@ -1,4 +1,5 @@
 """Модуль содержит конфигурации моделей приложения Review."""
+
 from django.contrib.auth.models import AbstractUser
 from django.core.validators import (
     MaxValueValidator,
@@ -23,7 +24,7 @@ ROLE_CHOICES = [
 
 class User(AbstractUser):
     role = models.CharField(
-        'роль', choices=ROLE_CHOICES, default=USER, max_length=20, blank=True
+        'роль', choices=ROLE_CHOICES, default=USER, max_length=20
     )
     confirmation_code = models.CharField(
         'код подтверждения', max_length=255, blank=False, default='012345'
@@ -179,8 +180,7 @@ class Review(models.Model):
         verbose_name_plural = 'Отзывы'
         constraints = [
             models.UniqueConstraint(
-                fields=['author', 'title'],
-                name='unique_author_title'
+                fields=['author', 'title'], name='unique_author_title'
             )
         ]
 
