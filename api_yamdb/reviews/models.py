@@ -7,23 +7,25 @@ from django.db import models
 from django.utils import timezone
 
 from .constants import (
-    CHAR_FIELD_LIMIT, SLUG_FIELD_LIMIT, SYMBOLS_LIMIT, MIN_TITLE_SCORE,
-    MAX_TITLE_SCORE
+    CHAR_FIELD_LIMIT,
+    MAX_TITLE_SCORE,
+    MIN_TITLE_SCORE,
+    SLUG_FIELD_LIMIT,
+    SYMBOLS_LIMIT,
 )
 from .validators import validate_username
 
-USER = 'user'
-ADMIN = 'admin'
-MODERATOR = 'moderator'
-
-ROLE_CHOICES = [
-    (USER, USER),
-    (ADMIN, ADMIN),
-    (MODERATOR, MODERATOR),
-]
-
 
 class User(AbstractUser):
+    USER = 'user'
+    ADMIN = 'admin'
+    MODERATOR = 'moderator'
+
+    ROLE_CHOICES = [
+        (USER, USER),
+        (ADMIN, ADMIN),
+        (MODERATOR, MODERATOR),
+    ]
     role = models.CharField(
         'роль', choices=ROLE_CHOICES, default=USER, max_length=20
     )
@@ -44,15 +46,15 @@ class User(AbstractUser):
 
     @property
     def is_user(self):
-        return self.role == USER
+        return self.role == self.USER
 
     @property
     def is_admin(self):
-        return self.role == ADMIN
+        return self.role == self.ADMIN
 
     @property
     def is_moderator(self):
-        return self.role == MODERATOR
+        return self.role == self.MODERATOR
 
     class Meta:
         verbose_name = 'Пользователь'
@@ -115,7 +117,7 @@ class Title(models.Model):
     year = models.PositiveSmallIntegerField(
         verbose_name='Год создания',
         validators=[MaxValueValidator(timezone.now().year)],
-        db_index=True
+        db_index=True,
     )
     description = models.TextField(
         null=True, blank=True, verbose_name='Описание'
@@ -165,8 +167,11 @@ class Review(models.Model):
         'Дата добавления', auto_now_add=True, db_index=True
     )
     score = models.PositiveSmallIntegerField(
-        default=0, validators=[MinValueValidator(MIN_TITLE_SCORE),
-                               MaxValueValidator(MAX_TITLE_SCORE)]
+        default=0,
+        validators=[
+            MinValueValidator(MIN_TITLE_SCORE),
+            MaxValueValidator(MAX_TITLE_SCORE),
+        ],
     )
 
     class Meta:
