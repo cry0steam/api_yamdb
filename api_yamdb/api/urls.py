@@ -1,5 +1,3 @@
-"""Модуль содержит URL настройки адрессов приложения API."""
-
 from django.urls import include, path  # type: ignore
 from rest_framework.routers import DefaultRouter  # type: ignore
 

@@ -1,4 +1,3 @@
-"""Модуль содержит конфигурации приложения Api."""
 from django.apps import AppConfig
 
 

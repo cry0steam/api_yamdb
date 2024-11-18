@@ -1,4 +1,3 @@
-"""Модуль содержит конфигурации приложения Review."""
 from django.apps import AppConfig
 
 
