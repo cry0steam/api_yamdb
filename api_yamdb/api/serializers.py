@@ -1,4 +1,5 @@
 from rest_framework import serializers
+
 from reviews.models import Category, Comments, Genre, Review, Title, User
 from reviews.validators import validate_username
 from reviews.constants import MIN_TITLE_SCORE, MAX_TITLE_SCORE
