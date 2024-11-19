@@ -1,4 +1,3 @@
-"""Модуль содержит настройки правил запретов API."""
 from rest_framework.permissions import SAFE_METHODS, BasePermission
 
 

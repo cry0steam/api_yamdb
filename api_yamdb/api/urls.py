@@ -1,5 +1,3 @@
-"""Модуль содержит URL настройки адрессов приложения API."""
-
 from django.urls import include, path  # type: ignore
 from rest_framework.routers import DefaultRouter  # type: ignore
 
@@ -28,8 +26,18 @@ router_v1.register('categories', CategoryViewSet, basename='category')
 router_v1.register('genres', GenreViewSet, basename='genre')
 router_v1.register('users', UserViewSet, basename='users')
 
+auth_urls = [
+    path('signup/', APISignup.as_view(), name='signup'),
+    path('token/', APIGetToken.as_view(), name='get_token'),
+]
 urlpatterns = [
-    path('v1/', include(router_v1.urls)),
-    path('v1/auth/signup/', APISignup.as_view(), name='signup'),
-    path('v1/auth/token/', APIGetToken.as_view(), name='get_token'),
+    path(
+        'v1/',
+        include(
+            [
+                path('auth/', include(auth_urls)),
+                path('', include(router_v1.urls)),
+            ]
+        ),
+    )
 ]

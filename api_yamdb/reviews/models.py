@@ -1,5 +1,3 @@
-"""Модуль содержит конфигурации моделей приложения Review."""
-
 from django.contrib.auth.models import AbstractUser
 from django.core.validators import (
     MaxValueValidator,
@@ -8,21 +6,26 @@ from django.core.validators import (
 from django.db import models
 from django.utils import timezone
 
-from .constants import CHAR_FIELD_LIMIT, SLUG_FIELD_LIMIT, SYMBOLS_LIMIT
+from .constants import (
+    CHAR_FIELD_LIMIT,
+    MAX_TITLE_SCORE,
+    MIN_TITLE_SCORE,
+    SLUG_FIELD_LIMIT,
+    SYMBOLS_LIMIT,
+)
 from .validators import validate_username
-
-USER = 'user'
-ADMIN = 'admin'
-MODERATOR = 'moderator'
-
-ROLE_CHOICES = [
-    (USER, USER),
-    (ADMIN, ADMIN),
-    (MODERATOR, MODERATOR),
-]
 
 
 class User(AbstractUser):
+    USER = 'user'
+    ADMIN = 'admin'
+    MODERATOR = 'moderator'
+
+    ROLE_CHOICES = [
+        (USER, USER),
+        (ADMIN, ADMIN),
+        (MODERATOR, MODERATOR),
+    ]
     role = models.CharField(
         'роль', choices=ROLE_CHOICES, default=USER, max_length=20
     )
@@ -43,22 +46,16 @@ class User(AbstractUser):
 
     @property
     def is_user(self):
-        return self.role == USER
+        return self.role == self.USER
 
     @property
     def is_admin(self):
-        return self.role == ADMIN
+        return self.role == self.ADMIN
 
     @property
     def is_moderator(self):
-        return self.role == MODERATOR
+        return self.role == self.MODERATOR
 
-    # @receiver(post_save, sender=User)
-    # def post_save(sender, instance, created, **kwargs):
-    #     if created:
-    #         confirmation_code = default_token_generator.make_token(instance)
-    #         instance.confirmation_code = confirmation_code
-    #         instance.save()
     class Meta:
         verbose_name = 'Пользователь'
         verbose_name_plural = 'Пользователи'
@@ -117,9 +114,10 @@ class Title(models.Model):
     name = models.CharField(
         max_length=CHAR_FIELD_LIMIT, verbose_name='Название'
     )
-    year = models.SmallIntegerField(
+    year = models.PositiveSmallIntegerField(
         verbose_name='Год создания',
         validators=[MaxValueValidator(timezone.now().year)],
+        db_index=True,
     )
     description = models.TextField(
         null=True, blank=True, verbose_name='Описание'
@@ -168,8 +166,12 @@ class Review(models.Model):
     pub_date = models.DateTimeField(
         'Дата добавления', auto_now_add=True, db_index=True
     )
-    score = models.IntegerField(
-        default=0, validators=[MinValueValidator(1), MaxValueValidator(10)]
+    score = models.PositiveSmallIntegerField(
+        default=0,
+        validators=[
+            MinValueValidator(MIN_TITLE_SCORE),
+            MaxValueValidator(MAX_TITLE_SCORE),
+        ],
     )
 
     class Meta:

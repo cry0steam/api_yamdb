@@ -1,8 +1,8 @@
-"""Модуль содержит настройки сериализаторов приложения API."""
-
 from rest_framework import serializers
+
 from reviews.models import Category, Comments, Genre, Review, Title, User
 from reviews.validators import validate_username
+from reviews.constants import MIN_TITLE_SCORE, MAX_TITLE_SCORE
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -39,7 +39,9 @@ class ReviewSerializer(serializers.ModelSerializer):
     author = serializers.SlugRelatedField(
         slug_field='username', read_only=True
     )
-    score = serializers.IntegerField(min_value=1, max_value=10)
+    score = serializers.IntegerField(
+        min_value=MIN_TITLE_SCORE, max_value=MAX_TITLE_SCORE
+    )
     title = serializers.PrimaryKeyRelatedField(read_only=True)
 
     class Meta:
@@ -54,9 +56,7 @@ class ReviewSerializer(serializers.ModelSerializer):
         title_id = self.context['view'].kwargs['title_id']
 
         if self.context['request'].method == 'POST':
-            if Review.objects.filter(
-                author=author, title_id=title_id
-            ).exists():
+            if author.reviews.filter(title=title_id):
                 raise serializers.ValidationError(
                     'Вы уже оставили отзыв на это произведение.'
                 )
