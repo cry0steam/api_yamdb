@@ -1,5 +1,5 @@
 [tool.ruff]
-src = ["."]
+src = ["api_yamdb"]
 line-length = 79
 
 [tool.ruff.format]

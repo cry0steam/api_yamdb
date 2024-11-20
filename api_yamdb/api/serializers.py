@@ -1,8 +1,13 @@
 from rest_framework import serializers
 
+from reviews.constants import (
+    EMAIL_LENGTH,
+    MAX_TITLE_SCORE,
+    MIN_TITLE_SCORE,
+    USERNAME_LENGTH,
+)
 from reviews.models import Category, Comments, Genre, Review, Title, User
 from reviews.validators import validate_username
-from reviews.constants import MIN_TITLE_SCORE, MAX_TITLE_SCORE
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -81,9 +86,11 @@ class CommentsSerializer(serializers.ModelSerializer):
 
 class SignUpSerializer(serializers.ModelSerializer):
     username = serializers.CharField(
-        validators=[validate_username], required=True, max_length=150
+        validators=[validate_username],
+        required=True,
+        max_length=USERNAME_LENGTH,
     )
-    email = serializers.EmailField(required=True, max_length=254)
+    email = serializers.EmailField(required=True, max_length=EMAIL_LENGTH)
 
     class Meta:
         model = User
