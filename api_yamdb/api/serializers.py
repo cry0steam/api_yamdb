@@ -4,7 +4,6 @@ from reviews.constants import (
     EMAIL_LENGTH,
     MAX_TITLE_SCORE,
     MIN_TITLE_SCORE,
-    USERNAME_LENGTH,
 )
 from reviews.models import Category, Comments, Genre, Review, Title, User
 from reviews.validators import validate_username
@@ -88,7 +87,7 @@ class SignUpSerializer(serializers.ModelSerializer):
     username = serializers.CharField(
         validators=[validate_username],
         required=True,
-        max_length=USERNAME_LENGTH,
+        max_length=150,
     )
     email = serializers.EmailField(required=True, max_length=EMAIL_LENGTH)
 

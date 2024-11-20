@@ -15,6 +15,7 @@ from .constants import (
     ROLE_LENGTH,
     SLUG_FIELD_LIMIT,
     SYMBOLS_LIMIT,
+    USERNAME_LENGTH,
 )
 from .validators import validate_username
 
@@ -42,9 +43,9 @@ class User(AbstractUser):
         'биография',
         blank=True,
     )
-    email = models.EmailField('почта', unique=True)
+    email = models.EmailField('почта', max_length=EMAIL_LENGTH, unique=True)
     username = models.CharField(
-        max_length=EMAIL_LENGTH,
+        max_length=USERNAME_LENGTH,
         verbose_name='имя пользователя',
         unique=True,
         validators=(validate_username,),
