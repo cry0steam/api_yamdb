@@ -2,7 +2,6 @@ from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import EmailMessage
 from django.db.models import Avg
 from django.shortcuts import get_object_or_404
-from django_filters import CharFilter, FilterSet
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, mixins, status, viewsets
 from rest_framework.decorators import action
@@ -13,6 +12,7 @@ from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from reviews.models import Category, Comments, Genre, Review, Title, User
+
 from .filters import TitleFilterSet
 from .permissions import IsAdmin, IsAdminOrReadOnly, IsAuthorOrReadOnly
 from .serializers import (
