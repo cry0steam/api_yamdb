@@ -13,6 +13,7 @@ from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from reviews.models import Category, Comments, Genre, Review, Title, User
+from .filters import TitleFilterSet
 from .permissions import IsAdmin, IsAdminOrReadOnly, IsAuthorOrReadOnly
 from .serializers import (
     CategorySerializer,
@@ -52,18 +53,6 @@ class GenreViewSet(ListCreateDestroyViewSet):
     serializer_class = GenreSerializer
 
 
-class TitleFilterSet(FilterSet):
-    category = CharFilter(field_name='category__slug')
-    genre = CharFilter(field_name='genre__slug')
-    name = CharFilter(lookup_expr='iexact')
-
-    class Meta:
-        model = Title
-        fields = {
-            'year': ['exact'],
-        }
-
-
 class TitleViewSet(viewsets.ModelViewSet):
     http_method_names = ['post', 'get', 'delete', 'patch']
     queryset = Title.objects.annotate(rating=Avg('reviews__score')).order_by(
@@ -89,11 +78,6 @@ class TitleViewSet(viewsets.ModelViewSet):
         self.perform_create(serializer)
 
 
-def get_needed_object(obj, model, id):
-    """Метод получени объекта на основе модели и id."""
-    return get_object_or_404(model, id=obj.kwargs.get(id))
-
-
 class ReviewViewSet(viewsets.ModelViewSet):
     """Настройки вьюсета модели Review."""
 
@@ -105,14 +89,15 @@ class ReviewViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         """Определяет необходимый набор queryset для сериализации."""
-        return get_needed_object(self, Title, 'title_id').reviews.all()
+        title_id = self.kwargs.get('title_id')
+        title = get_object_or_404(Title, id=title_id)
+        return title.reviews.all()
 
     def perform_create(self, serializer):
         """Создание нового экземпляра модели после сериализации."""
-        serializer.save(
-            author=self.request.user,
-            title=get_needed_object(self, Title, 'title_id'),
-        )
+        title_id = self.kwargs.get('title_id')
+        title = get_object_or_404(Title, id=title_id)
+        serializer.save(author=self.request.user, title=title)
 
 
 class CommentsViewSet(viewsets.ModelViewSet):
@@ -126,14 +111,15 @@ class CommentsViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         """Определяет необходимый набор queryset для сериализации."""
-        return get_needed_object(self, Review, 'review_id').comments.all()
+        review_id = self.kwargs.get('review_id')
+        review = get_object_or_404(Review, id=review_id)
+        return review.comments.all()
 
     def perform_create(self, serializer):
         """Создание нового экземпляра модели после сериализации."""
-        serializer.save(
-            author=self.request.user,
-            review=get_needed_object(self, Review, 'review_id'),
-        )
+        review_id = self.kwargs.get('review_id')
+        review = get_object_or_404(Review, id=review_id)
+        serializer.save(author=self.request.user, review=review)
 
 
 class APISignup(APIView):

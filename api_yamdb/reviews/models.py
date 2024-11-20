@@ -8,8 +8,11 @@ from django.utils import timezone
 
 from .constants import (
     CHAR_FIELD_LIMIT,
+    CODE_LENGTH,
+    EMAIL_LENGTH,
     MAX_TITLE_SCORE,
     MIN_TITLE_SCORE,
+    ROLE_LENGTH,
     SLUG_FIELD_LIMIT,
     SYMBOLS_LIMIT,
 )
@@ -27,10 +30,13 @@ class User(AbstractUser):
         (MODERATOR, MODERATOR),
     ]
     role = models.CharField(
-        'роль', choices=ROLE_CHOICES, default=USER, max_length=20
+        'роль', choices=ROLE_CHOICES, default=USER, max_length=ROLE_LENGTH
     )
     confirmation_code = models.CharField(
-        'код подтверждения', max_length=255, blank=False, default='012345'
+        'код подтверждения',
+        max_length=CODE_LENGTH,
+        blank=False,
+        default='012345',
     )
     bio = models.TextField(
         'биография',
@@ -38,7 +44,7 @@ class User(AbstractUser):
     )
     email = models.EmailField('почта', unique=True)
     username = models.CharField(
-        max_length=150,
+        max_length=EMAIL_LENGTH,
         verbose_name='имя пользователя',
         unique=True,
         validators=(validate_username,),
