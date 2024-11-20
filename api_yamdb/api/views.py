@@ -13,6 +13,7 @@ from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from reviews.models import Category, Comments, Genre, Review, Title, User
+from .filters import TitleFilterSet
 from .permissions import IsAdmin, IsAdminOrReadOnly, IsAuthorOrReadOnly
 from .serializers import (
     CategorySerializer,
@@ -50,18 +51,6 @@ class CategoryViewSet(ListCreateDestroyViewSet):
 class GenreViewSet(ListCreateDestroyViewSet):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
-
-
-class TitleFilterSet(FilterSet):
-    category = CharFilter(field_name='category__slug')
-    genre = CharFilter(field_name='genre__slug')
-    name = CharFilter(lookup_expr='iexact')
-
-    class Meta:
-        model = Title
-        fields = {
-            'year': ['exact'],
-        }
 
 
 class TitleViewSet(viewsets.ModelViewSet):
